@@ -39,7 +39,7 @@ try
     pauseInterval=0.2; % Seconds
     
     %Saving to file in a chosen folder
-    savePath='C:\Documents and Settings\owner\Desktop\New folder\'; %chosen folder
+    savePath='.\2nd_day\magnet\'; %chosen folder
     fnamePattern='SupCondData';%File name
     fname=nextAvailableFilename(savePath,fnamePattern,'csv');
     header='Time(sec),TempRes(Ohm),SampVolt(V),SampCurr(A),CoilCurr(A)\n';

@@ -1,4 +1,4 @@
-SAVE_PATH = 'C:\Users\Owner\Desktop\New folder\hallprobe\'; %chosen folder
+SAVE_PATH = '.\2nd_day\vortices\'; %chosen folder
 MINIMUM_TEMPERATURE = 80;
 
 temperature_table = load('temperature_conversion.mat', 'table');
@@ -22,7 +22,7 @@ try
     
     % Field and sample-current values for execution:
     coilCurrent=0.0; % Amps
-    coilVolt=2;
+    coilVolt=4;
     sampleCurrent=0.03; % Amps
     heatCurr=0;
     heatVolt=0;
@@ -54,7 +54,7 @@ try
     pause(pauseInterval);
     figure
     hold on
-    for coilCurrent=0:0.0005:0.1
+    for coilCurrent=0:0.1:6.2
                 
         fprintf(coilCurrentDevice,sprintf ('APPL %f, %f',coilVolt,coilCurrent));%Setting Field current
         
@@ -88,32 +88,32 @@ try
         
 
         %
-         fprintf(coilCurrentDevice,sprintf ('APPL %f, %f',0,0));%Setting Field current
-        
-        pause(pauseInterval);
-        time=etime(clock,startTime);
-        
-        % Read temperature
-        fprintf(tempResDevice, 'READ?');
-        tempResistance = readMeas(tempResDevice);
-        temperature = interp1(temperature_table(:,1),temperature_table(:,2),tempResistance);
-       
-        % Read sample voltage
-        fprintf(sampleVoltageDevice, 'READ?');
-        sampleVoltage = readMeas(sampleVoltageDevice);
-        
-        % Read sample current
-        fprintf(sampleCurrentDevice, 'INST P6V; CURRENT?');
-        sampleCurrentMeas = readMeas(sampleCurrentDevice);
-        fprintf(sampleCurrentDevice, 'INST P25V;');
-        
-
-        
-        plot(coilCurrentMeas,sampleVoltage,'r.','MarkerSize',20)
-        
-        dlmwrite (fname,[time,tempResistance,temperature,...
-            sampleVoltage,sampleCurrentMeas,...
-            coilCurrentMeas],'-append');
+%          fprintf(coilCurrentDevice,sprintf ('APPL %f, %f',0,0));%Setting Field current
+%         
+%         pause(pauseInterval);
+%         time=etime(clock,startTime);
+%         
+%         % Read temperature
+%         fprintf(tempResDevice, 'READ?');
+%         tempResistance = readMeas(tempResDevice);
+%         temperature = interp1(temperature_table(:,1),temperature_table(:,2),tempResistance);
+%        
+%         % Read sample voltage
+%         fprintf(sampleVoltageDevice, 'READ?');
+%         sampleVoltage = readMeas(sampleVoltageDevice);
+%         
+%         % Read sample current
+%         fprintf(sampleCurrentDevice, 'INST P6V; CURRENT?');
+%         sampleCurrentMeas = readMeas(sampleCurrentDevice);
+%         fprintf(sampleCurrentDevice, 'INST P25V;');
+%         
+% 
+%         
+%         plot(coilCurrentMeas,sampleVoltage,'r.','MarkerSize',20)
+%         
+%         dlmwrite (fname,[time,tempResistance,temperature,...
+%             sampleVoltage,sampleCurrentMeas,...
+%             coilCurrentMeas],'-append');
         
         
         %
