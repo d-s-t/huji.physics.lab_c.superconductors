@@ -8,11 +8,18 @@ import plotly.graph_objects as go
 from glob import glob
 from typing import Any, Sequence
 from scipy import optimize
+from itertools import chain
 
 AXIS_CHOICE = {"tmp": "Temperature(K)",
                "sv": "SampVolt(V)",
                "sc": "SampCurr(A)",
                "cc": "CoilCurr(A)"}
+
+AXIS_TITLE = {"Temperature(K)": r"$ \text{Temperature} \left[ K \right] $",
+              "SampVolt(V)": r"$ \text{Sample Voltage} \left[ V \right] $",
+              "SampCurr(A)": r"$ \text{Sample Current} \left[ A \right] $",
+              "CoilCurr(A)": r"$ \text{Coil Current} \left[ A \right] $",
+              "mf": r"$ \text{Magnetic Field} \left[ G \right] $"}
 
 FUNCTIONAL_RELATION = {"tmp": {"tmp": lambda tmp: tmp,
                                "sv": lambda sv, v0, u: u / (const.k * np.log(sv / v0)),
@@ -84,6 +91,10 @@ def get_args() -> argparse.Namespace:
 
     parser.add_argument("-f", action=ExtendAction, type=file_type, required=True, dest="tables",
                         help="csv file path. may contain wildcards.")
+    parser.add_argument("-c", action="append", type=str, required=False, dest="color",
+                        help="color of the dots in the graph.")
+    parser.add_argument("--trace_name", action="append", type=str, required=False,
+                        help="name for the trace in the legend.")
 
     parser.add_argument("-x", action=DictAction, required=True, choices=AXIS_CHOICE,
                         help="the x axis argument")
@@ -91,6 +102,10 @@ def get_args() -> argparse.Namespace:
                         help="the y axis argument")
     parser.add_argument("-z", action=DictAction, required=False, choices=AXIS_CHOICE,
                         help="the z axis argument. if set, that output will be heatmap.")
+
+    g = parser.add_mutually_exclusive_group()
+    g.add_argument("--concat", action="store_true", help="concat all the tables.")
+    g.add_argument("--hister", action="store_true", help="show all the data on the same fig.")
 
     parser.add_argument("--xmax", action="store", required=False, type=float, default=np.inf,
                         help="max value for x axis")
@@ -114,8 +129,8 @@ def get_args() -> argparse.Namespace:
     parser.add_argument("--function", action=DictAction, choices=FUNCTIONAL_RELATION, default=None,
                         help="the function to use in curve_fit", required=False)
 
-    parser.add_argument("-t", "--title", action="store", required=False, default="", choices=AXIS_CHOICE,
-                        help="the z axis argument. if set, that output will be heatmap.")
+    parser.add_argument("-t", "--title", action="store", required=False, default="",
+                        help="Title for the figure.")
 
     parser.add_argument("--height", action="store", default=None, type=int,
                         help="define the height of the figure output.")
@@ -123,11 +138,14 @@ def get_args() -> argparse.Namespace:
                         help="define the width of the figure output.")
     parser.add_argument("--scale", action="store", default=None, type=float,
                         help="define the scale of the figure output.")
+    parser.add_argument("--name", action="store", default=None, type=str,
+                        help="the name to save the figure in.")
 
-    parser.add_argument("--concat", action="store_true", help="concat all the tables.")
     parser.add_argument("--show", action="store_true", help="show the figures in the browser.")
     parser.add_argument("--html", action="store_true", help="save the figure to html file.")
-    parser.add_argument("--format", action="store", choices=("svg", 'png', 'jpeg', 'webp', 'pdf', 'eps'), default="svg",
+    parser.add_argument("--vline", action="store_true", help="add vertical line in the max diff.")
+    parser.add_argument("--format", action="append", choices=("svg", 'png', 'jpeg', 'webp', 'pdf', 'eps'),
+                        default=["svg"],
                         type=str, help="The format to save the figures in.")
 
     return parser.parse_args()
@@ -141,13 +159,12 @@ def analyze(ns: argparse.Namespace, fn: str, df: pd.DataFrame):
     fig = px.scatter(df, ns.x, ns.y, ns.z).update_layout(title=ns.title.format(**dict(mean, **std)) or fn)
     x = df[ns.x]
     y = df[ns.y]
+    popt, pcov = None, None
     if ns.function:
         popt, pcov = optimize.curve_fit(ns.function, x, y, maxfev=100_000, p0=(1e-4, 2, 5e-5, 0, 3, 5e-6))
         fig.add_trace(go.Scatter(x=x, y=ns.function(x, *popt)))
-    if ns.html:
-        fig.write_html(fn + ".html")
-    fig.write_image(fn + "." + ns.format, scale=ns.scale, width=ns.width, height=ns.height)
-    return mean, std, popt, pcov
+
+    return fig, mean, std, popt, pcov
 
 
 def filter_and_calibrate(df: pd.DataFrame) -> pd.DataFrame:
@@ -158,21 +175,49 @@ def filter_and_calibrate(df: pd.DataFrame) -> pd.DataFrame:
     df = df[(df[ns.x] >= ns.xmin) & (df[ns.x] <= ns.xmax) &
             (df[ns.y] >= ns.ymin) & (df[ns.y] <= ns.ymax) &
             ((df[ns.z] >= ns.zmin) & (df[ns.z] <= ns.zmax) if ns.z else True)]
-    return df
+    return df.sort_values(ns.x).reindex()
+
+
+def export_fig(fig, fn, ns):
+    if ns.html:
+        fig.write_html(fn + ".html")
+    for form in ns.format:
+        fig.write_image(fn + "." + form, scale=ns.scale, width=ns.width, height=ns.height)
 
 
 if __name__ == '__main__':
     ns = get_args()
-    frames = ((ns.tables[0][0] + "_CONCAT", pd.concat((df for fn, df in ns.tables))),) if ns.concat else ns.tables
+    frames = ((ns.name or (ns.tables[0][0] + "_CONCAT"),
+               pd.concat((df for fn, df in ns.tables))),) if ns.concat else ns.tables
     # t = np.zeros(len(ns.tables))
     # dt = np.zeros_like(t)
     # h = np.zeros_like(t)
     # dh = np.zeros_like(t)
+    figs = []
     for fn, df in frames:
-        analyze(ns, fn, filter_and_calibrate(df))
-        # x = np.linspace(x_min, popt[2])
-        # np.append(x, x_max)
-        # t[i] = np.mean(tmp)
-        # dt[i] = np.std(tmp)
-        # h[i] = popt[4]
-        # dh[i] = pcov[4, 4]**0.5
+        df = filter_and_calibrate(df)
+        fig, mean, std, popt, pcov = analyze(ns, fn, df)
+        fig.update_xaxes(title=AXIS_TITLE[ns.x]) \
+            .update_yaxes(title=AXIS_TITLE[ns.y])
+        figs.append(fig)
+        if ns.vline:
+            t_c = df[np.argmax(np.diff(df[ns.y]))][ns.x]
+            # t_c = max(df[ns.x][df[ns.y] <= 1.1*min(df[ns.y])])
+            fig.add_vline(t_c, annotation=dict(align="right", showarrow=False,
+                                               text="$ T_{c}=" + fr"{t_c:.0f} \pm 1" + r"\left[ K \right] $"))
+        fig.update_annotations(font=dict(size=30))
+        export_fig(fig, fn, ns)
+    if ns.hister:
+        fig = go.Figure(data=tuple((d.update(dict(marker_color=c, name=n, showlegend=True)) for d, c, n in
+                                    zip((d for f in figs for d in f.data), ns.color, ns.trace_name)))) \
+            .update_layout(showlegend=True, legend=dict(xanchor="left", x=0.05, yanchor="top", y=1-0.05)) \
+            .update_xaxes(title=AXIS_TITLE[ns.x]) \
+            .update_yaxes(title=AXIS_TITLE[ns.y])
+        export_fig(fig, ns.name or (ns.tables[0][0] + "_hister"), ns)
+
+    # x = np.linspace(x_min, popt[2])
+    # np.append(x, x_max)
+    # t[i] = np.mean(tmp)
+    # dt[i] = np.std(tmp)
+    # h[i] = popt[4]
+    # dh[i] = pcov[4, 4]**0.5
