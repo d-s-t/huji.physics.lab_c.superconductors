@@ -4,11 +4,11 @@ import pandas as pd
 import scipy.constants as const
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 
 from glob import glob
 from typing import Any, Sequence
 from scipy import optimize
-from itertools import chain
 
 AXIS_CHOICE = {"tmp": "Temperature(K)",
                "sv": "SampVolt(V)",
@@ -66,6 +66,7 @@ class DictAction(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, self.choices.get(values))
+        setattr(namespace, self.dest + "_key", values)
 
 
 def file_type(s: str) -> list[tuple[str, pd.DataFrame | Any]]:
@@ -167,6 +168,8 @@ def filter_and_calibrate(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def export_fig(fig, fn, ns):
+    fig.update_yaxes(showexponent="first", exponentformat="power", minexponent=1)
+    pio.full_figure_for_development(fig, warn=False)
     if ns.html:
         fig.write_html(fn + ".html")
     for form in ns.format:
@@ -198,7 +201,7 @@ if __name__ == '__main__':
     if ns.hister:
         fig = go.Figure(data=tuple((d.update(dict(marker_color=c, name=n, showlegend=True)) for d, c, n in
                                     zip((d for f in figs for d in f.data), ns.color, ns.trace_name)))) \
-            .update_layout(showlegend=True, legend=dict(xanchor="left", x=0.05, yanchor="top", y=1-0.05)) \
+            .update_layout(showlegend=True, legend=dict(xanchor="left", x=0.05, yanchor="top", y=1 - 0.05)) \
             .update_xaxes(title=AXIS_TITLE[ns.x]) \
             .update_yaxes(title=AXIS_TITLE[ns.y])
         export_fig(fig, ns.name or (ns.tables[0][0] + "_hister"), ns)
