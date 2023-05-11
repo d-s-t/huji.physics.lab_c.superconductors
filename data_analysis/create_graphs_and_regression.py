@@ -146,8 +146,8 @@ def analyze(ns: argparse.Namespace, fn: str, df: pd.DataFrame):
     std = df.std()
     std = {"d" + k: std[v] for k, v in AXIS_CHOICE.items()}
     fig = px.scatter(df, ns.x, ns.y, ns.z).update_layout(title=ns.title.format(**dict(mean, **std)) or fn)
-    x = df[ns.x]
-    y = df[ns.y]
+    x = df[[ns.x, ns.y]] if ns.z else df[ns.x]
+    y = df[ns.z] if ns.z else df[ns.y]
     popt, pcov = None, None
     if ns.function:
         popt, pcov = optimize.curve_fit(ns.function, x, y, maxfev=100_000, p0=(1e-4, 2, 5e-5, 0, 3, 5e-6))
@@ -188,16 +188,17 @@ if __name__ == '__main__':
     for fn, df in frames:
         df = filter_and_calibrate(df)
         fig, mean, std, popt, pcov = analyze(ns, fn, df)
-        fig.update_xaxes(title=AXIS_TITLE[ns.x]) \
-            .update_yaxes(title=AXIS_TITLE[ns.y])
-        figs.append(fig)
-        if ns.vline:
-            t_c = df[np.argmax(np.diff(df[ns.y]))][ns.x]
-            # t_c = max(df[ns.x][df[ns.y] <= 1.1*min(df[ns.y])])
-            fig.add_vline(t_c, annotation=dict(align="right", showarrow=False,
-                                               text="$ T_{c}=" + fr"{t_c:.0f} \pm 1" + r"\left[ K \right] $"))
-        fig.update_annotations(font=dict(size=30))
-        export_fig(fig, fn, ns)
+        if not ns.hister:
+            fig.update_xaxes(title=AXIS_TITLE[ns.x]) \
+                .update_yaxes(title=AXIS_TITLE[ns.y])
+            figs.append(fig)
+            if ns.vline:
+                t_c = df[ns.x][np.argmax(np.diff(df[ns.y]))]
+                # t_c = max(df[ns.x][df[ns.y] <= 1.1*min(df[ns.y])])
+                fig.add_vline(t_c, annotation=dict(align="left", showarrow=False, xanchor='right', x=t_c - 0.01,
+                                                   text="$ T_{c}=" + fr"{t_c:.0f} \pm 1" + r"\left[ K \right] $"))
+            fig.update_annotations(font=dict(size=20))
+            export_fig(fig, fn, ns)
     if ns.hister:
         fig = go.Figure(data=tuple((d.update(dict(marker_color=c, name=n, showlegend=True)) for d, c, n in
                                     zip((d for f in figs for d in f.data), ns.color, ns.trace_name)))) \
