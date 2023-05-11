@@ -80,8 +80,8 @@ class DictAction(argparse.Action):
         setattr(namespace, self.dest, self.choices.get(values))
 
 
-def file_type(s: str) -> list[pd.DataFrame]:
-    return [(fn[:-4], pd.read_csv(fn)) for fn in glob(s)]
+def file_type(s: str) -> list[tuple[str, pd.DataFrame | Any]]:
+    return [(fn[:-4], pd.read_csv(fn).assign(H=lambda x: H(x[AXIS_CHOICE["cc"]]))) for fn in glob(s)]
 
 
 def get_args() -> argparse.Namespace:
