@@ -175,7 +175,7 @@ def filter_and_calibrate(df: pd.DataFrame) -> pd.DataFrame:
     df = df[(df[ns.x] >= ns.xmin) & (df[ns.x] <= ns.xmax) &
             (df[ns.y] >= ns.ymin) & (df[ns.y] <= ns.ymax) &
             ((df[ns.z] >= ns.zmin) & (df[ns.z] <= ns.zmax) if ns.z else True)]
-    return df.sort_values(ns.x).reindex()
+    return df.sort_values(ns.x).reset_index(drop=True)
 
 
 def export_fig(fig, fn, ns):
