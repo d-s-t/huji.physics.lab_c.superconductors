@@ -13,35 +13,14 @@ from itertools import chain
 AXIS_CHOICE = {"tmp": "Temperature(K)",
                "sv": "SampVolt(V)",
                "sc": "SampCurr(A)",
-               "cc": "CoilCurr(A)"}
+               "cc": "CoilCurr(A)",
+               "h": "H"}
 
 AXIS_TITLE = {"Temperature(K)": r"$ \text{Temperature} \left[ K \right] $",
               "SampVolt(V)": r"$ \text{Sample Voltage} \left[ V \right] $",
               "SampCurr(A)": r"$ \text{Sample Current} \left[ A \right] $",
               "CoilCurr(A)": r"$ \text{Coil Current} \left[ A \right] $",
-              "mf": r"$ \text{Magnetic Field} \left[ G \right] $"}
-
-FUNCTIONAL_RELATION = {"tmp": {"tmp": lambda tmp: tmp,
-                               "sv": lambda sv, v0, u: u / (const.k * np.log(sv / v0)),
-                               "sc": lambda sc: sc,
-                               "cc": lambda cc: cc
-                               },
-                       "sv": {"tmp": lambda tmp, v0, u: v0 * np.exp(-u / (const.k * tmp)),
-                              "sv": lambda sv: sv,
-                              "sc": lambda sc: sc,
-                              "cc": lambda cc: cc
-                              },
-                       "sc": {"tmp": lambda tmp: tmp,
-                              "sv": lambda sv: sv,
-                              "sc": lambda sc: sc,
-                              "cc": lambda cc: cc
-                              },
-                       "cc": {"tmp": lambda tmp: tmp,
-                              "sv": lambda sv: sv,
-                              "sc": lambda sc: sc,
-                              "cc": lambda cc: cc
-                              }
-                       }
+              "H": r"$ \text{Applied Magnetic Field} \left[ G \right] $"}
 
 
 def exp(x, y0, k, b, phi):
@@ -57,6 +36,15 @@ def exp_heavy_line(x, y0, k, b0, phi, x0, m):
 
 
 FUNCTIONAL_RELATION = {"exp": exp, "line": line, "exp_heavy_line": exp_heavy_line}
+
+
+def get_H_func():
+    df = pd.read_csv("../measurement_data/H_vs_CC.csv")
+    popt, pcov = optimize.curve_fit(line, df[AXIS_CHOICE["cc"]], df[AXIS_CHOICE["h"]])
+    return lambda cc: cc * popt[0]
+
+
+H = get_H_func()
 
 
 class ExtendAction(argparse.Action):
