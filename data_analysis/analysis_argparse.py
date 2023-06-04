@@ -113,7 +113,7 @@ parser.add_argument("--show", action="store_true", help="show the figures in the
 parser.add_argument("--html", action="store_true", help="save the figure to html file.")
 parser.add_argument("--vline", action="store_true", help="add vertical line in the max diff.")
 parser.add_argument("--format", action="append", choices=("svg", 'png', 'jpeg', 'webp', 'pdf', 'eps'),
-                    default=["svg"],
+                    default=[],
                     type=str, help="The format to save the figures in.")
 
 ns = parser.parse_args()
