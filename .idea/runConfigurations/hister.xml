@@ -14,7 +14,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data_analysis/create_graphs_and_regression.py" />
-    <option name="PARAMETERS" value="-f ../measurement_data/day1/fourprobe/cooldown_four.csv -c blue --trace_name &quot;Cool-down&quot; -f ../measurement_data/day1/fourprobe/heatup_four.csv -c red --trace_name &quot;Heat-up&quot; -x tmp -y sv --xclib 20 --xmin 87 --xmax 102 --width 500 --height 400 --title &quot; &quot; --format pdf --hister --name hiterasis" />
+    <option name="PARAMETERS" value="-f &quot;D:\uni stuff\huji.physics.lab_c.superconductors\measurement_data\day1\fourprobe\cooldown_critical_temp.csv&quot; -c blue --trace_name &quot;Cool-down&quot; -f &quot;D:\uni stuff\huji.physics.lab_c.superconductors\measurement_data\day1\fourprobe\heatup_critical_temp.csv&quot; -c red --trace_name &quot;Heat-up&quot; -x tmp -y sv --clib tmp 20 --xmin 87 --xmax 102 --width 750 --height 600 --title &quot; &quot; --format pdf --hister --name ..\measurement_data\day1\hiterasis --vline" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

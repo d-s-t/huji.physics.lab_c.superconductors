@@ -14,7 +14,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data_analysis/create_graphs_and_regression.py" />
-    <option name="PARAMETERS" value="-f ../measurement_data/day3/vortices/*.csv -x tmp --xmax 90 -y h -z sv --xclib 20 --show --width 500 --height 400 --title &quot; &quot; --format pdf --concat --name ../measurement_data/day3/vortices_concat_" />
+    <option name="PARAMETERS" value="-f ../measurement_data/day3/vortices/*.csv -x tmp --xmax 90 -y h -z sv --xclib 20 --show --width 500 --height 400 --title &quot;$ {tmp} \pm {dtmp} $&quot;" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
