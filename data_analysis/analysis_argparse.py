@@ -58,6 +58,8 @@ parser.add_argument("-y", action=DictAction, required=True, choices=AXIS_CHOICE,
                     help="the y axis argument")
 parser.add_argument("-z", action=DictAction, required=False, choices=AXIS_CHOICE,
                     help="the z axis argument. if set, that output will be heatmap.")
+parser.add_argument("-s", action=DictAction, required=False, choices=AXIS_CHOICE,
+                    help="split the data to buckets by this axis.")
 
 g = parser.add_mutually_exclusive_group()
 g.add_argument("--concat", action="store_true", help="concat all the tables.")
@@ -81,8 +83,18 @@ parser.add_argument("--zmin", action="store", required=False, type=float, defaul
                     help="min value for z axis")
 parser.add_argument("--zclib", action="store", required=False, type=float, default=0,
                     help="calibration for z axis")
+parser.add_argument("--smax", action="store", required=False, type=float, default=np.inf,
+                    help="max value for s axis")
+parser.add_argument("--smin", action="store", required=False, type=float, default=-np.inf,
+                    help="min value for s axis")
+parser.add_argument("--sclib", action="store", required=False, type=float, default=0,
+                    help="calibration for split axis")
+parser.add_argument("--clib", action="append", required=False, type=str, nargs=2,
+                    help="calibration for given column")
 
 parser.add_argument("--function", action=DictAction, choices=FUNCTIONAL_RELATION, default=None,
+                    help="the function to use in curve_fit", required=False)
+parser.add_argument("--p0", action="store", nargs="+", type=float, default=None,
                     help="the function to use in curve_fit", required=False)
 
 parser.add_argument("-t", "--title", action="store", required=False, default="",
