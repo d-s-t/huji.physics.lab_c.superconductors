@@ -5,13 +5,15 @@ AXIS_CHOICE = {"tmp": "Temperature(K)",
                "sv": "SampVolt(V)",
                "sc": "SampCurr(A)",
                "cc": "CoilCurr(A)",
-               "h": "H"}
+               "h": "H",
+               "r": "R"}
 
 AXIS_TITLE = {"Temperature(K)": r"$ \text{Temperature} \left[ K \right] $",
               "SampVolt(V)": r"$ \text{Sample Voltage} \left[ V \right] $",
               "SampCurr(A)": r"$ \text{Sample Current} \left[ A \right] $",
               "CoilCurr(A)": r"$ \text{Coil Current} \left[ A \right] $",
-              "H": r"$ \text{Applied Magnetic Field} \left[ G \right] $"}
+              "H": r"$ \text{Applied Magnetic Field} \left[ G \right] $",
+              "R": r"$ \text{Sample Resistance} \left[ m\Omega \right] $"}
 
 
 def exp(x, y0, k, b):

@@ -61,8 +61,8 @@ def filter_and_calibrate(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def export_fig(fig, fn, ns):
-    fig.update_yaxes(showexponent="first", exponentformat="power", minexponent=1)
-    pio.full_figure_for_development(fig, warn=False)
+    fig.update_yaxes(showexponent="first", exponentformat="power")
+    # pio.full_figure_for_development(fig, warn=False)
     if ns.show:
         fig.show(config=dict(toImageButtonOptions=dict(filename=fn, scale=ns.scale,
                                                        width=ns.width, height=ns.height, format="pdf")))
@@ -89,18 +89,18 @@ if __name__ == '__main__':
                pd.concat((df for fn, df in ns.tables))),) if ns.concat else ns.tables
     if ns.s:
         frames = split_to_buckets(frames, ns.s, ns.s_key)
-    t = np.zeros(len(frames))
-    dt = np.zeros_like(t)
-    h = np.zeros_like(t)
-    dh = np.zeros_like(t)
+    # t = np.zeros(len(frames))
+    # dt = np.zeros_like(t)
+    # h = np.zeros_like(t)
+    # dh = np.zeros_like(t)
     figs = []
     for i, (fn, df) in enumerate(frames):
         df = filter_and_calibrate(df)
         fig, mean, std, popt, pcov = analyze(ns, fn, df)
-        t[i] = mean["tmp"]
-        dt[i] = std["dtmp"]
-        h[i] = popt[3]
-        dh[i] = pcov[3, 3] ** 0.5
+        # t[i] = mean["tmp"]
+        # dt[i] = std["dtmp"]
+        # h[i] = popt[3]
+        # dh[i] = pcov[3, 3] ** 0.5
         fig.update_xaxes(title=AXIS_TITLE[ns.x]) \
             .update_yaxes(title=AXIS_TITLE[ns.y])
         figs.append(fig)
@@ -118,8 +118,8 @@ if __name__ == '__main__':
             .update_xaxes(title=AXIS_TITLE[ns.x]) \
             .update_yaxes(title=AXIS_TITLE[ns.y])
         export_fig(fig, ns.name or (ns.tables[0][0] + "_hister"), ns)
-    fig = go.Figure(go.Scatter(y=h, x=t, error_x=dict(array=dt), mode="markers", showlegend=False)) \
-        .update_xaxes(title=AXIS_TITLE[AXIS_CHOICE["tmp"]]) \
-        .update_yaxes(title=AXIS_TITLE["H"])
-    export_fig(fig, ns.name, ns)
-    export_fig(fig, ns.name, ns)
+    # fig = go.Figure(go.Scatter(y=h, x=t, error_x=dict(array=dt), mode="markers", showlegend=False)) \
+    #     .update_xaxes(title=AXIS_TITLE[AXIS_CHOICE["tmp"]]) \
+    #     .update_yaxes(title=AXIS_TITLE["H"])
+    # export_fig(fig, ns.name, ns)
+    # export_fig(fig, ns.name, ns)

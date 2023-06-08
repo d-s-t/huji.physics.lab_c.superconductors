@@ -38,7 +38,9 @@ class DictAction(argparse.Action):
 
 
 def file_type(s: str) -> list[tuple[str, pd.DataFrame | Any]]:
-    return [(fn[:-4], pd.read_csv(fn).assign(H=lambda x: H(x[AXIS_CHOICE["cc"]]))) for fn in glob(s)]
+    return [(fn[:-4], pd.read_csv(fn).assign(H=lambda x: H(x[AXIS_CHOICE["cc"]]),
+                                             R=lambda x: 1e3 * x[AXIS_CHOICE["sv"]] / x[AXIS_CHOICE["sc"]]))
+            for fn in glob(s)]
 
 
 parser = argparse.ArgumentParser(
@@ -89,7 +91,7 @@ parser.add_argument("--smin", action="store", required=False, type=float, defaul
                     help="min value for s axis")
 parser.add_argument("--sclib", action="store", required=False, type=float, default=0,
                     help="calibration for split axis")
-parser.add_argument("--clib", action="append", required=False, type=str, nargs=2,
+parser.add_argument("--clib", action="append", required=False, type=str, nargs=2, default=[],
                     help="calibration for given column")
 
 parser.add_argument("--function", action=DictAction, choices=FUNCTIONAL_RELATION, default=None,
