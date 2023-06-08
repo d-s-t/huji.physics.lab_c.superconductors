@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="day3vort 100k" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="fig6" type="PythonConfigurationType" factoryName="Python">
     <module name="huji.physics.lab_c.superconductors" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
@@ -13,7 +13,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data_analysis/create_graphs_and_regression.py" />
-    <option name="PARAMETERS" value="-f ../measurement_data/day3/vortices/SupCondData_Meissner_*.csv -x cc -y sv -z tmp --zmax 100 --zclib 20" />
+    <option name="PARAMETERS" value="-f ../measurement_data/day1/fourprobe/*.csv -x tmp -y r --xclib 20 --xmin 87 --xmax 102 --width 500 --height 400 --title &quot; &quot; --show --vline" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
